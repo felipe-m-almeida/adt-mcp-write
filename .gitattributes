@@ -1,0 +1,7 @@
+# Fim de linha normalizado: o repositorio guarda LF, o checkout adapta.
+# build.sh precisa de LF mesmo no Windows (CRLF quebra o shebang no Linux/macOS);
+# os scripts PowerShell ficam com CRLF, que e o esperado no Windows.
+* text=auto eol=lf
+*.sh  text eol=lf
+*.ps1 text eol=crlf
+*.jar binary
