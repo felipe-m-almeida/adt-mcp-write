@@ -19,8 +19,8 @@ final class Guards {
 
    /**
     * Resolve o destino ADT: o do argumento vence; senao cai no configurado por
-    * -D no eclipse.ini, inclusive o do ARC-1, para nao ter de repetir o destino
-    * em toda chamada.
+    * -D no eclipse.ini. A segunda property e a que a extensao ARC-1 ja usa, para
+    * quem tem as duas instaladas configurar o destino uma vez so.
     */
    static String resolveDestination(String fromArguments) {
       if (fromArguments != null && !fromArguments.isEmpty()) {

@@ -23,6 +23,20 @@ conteúdo continua sendo trabalho manual de copiar e colar no editor.
 
 Esta extensão fecha essa lacuna, com duas ferramentas MCP.
 
+### Relação com o ARC-1
+
+A [ARC-1 MCP Extension](https://github.com/arc-mcp/arc1-adt-abap-mcp-ext) (MIT)
+é a extensão que dá ao servidor MCP do ADT as ferramentas de leitura que fazem o
+trabalho do dia a dia: busca no repositório, leitura de fonte, where-used, check
+de sintaxe, ATC, data preview via HTTP genérico. Se você ainda não a tem, comece
+por ela — **este projeto é complemento, não substituto**.
+
+As 18 ferramentas do ARC-1 são **read-only por decisão de design**: nenhuma cria,
+altera ou apaga fonte, e não há PUT nem lock/unlock no código dela. Esta extensão
+existe justamente para quem precisa do passo seguinte, e mantém a separação: ler,
+buscar e validar continuam lá; gravar e ativar ficam aqui, com as travas da seção
+[Travas](#travas). As duas convivem no mesmo `dropins/` e no mesmo servidor MCP.
+
 ## Ferramentas
 
 ### `adt_write_source`
@@ -85,8 +99,9 @@ Para desinstalar, apague o JAR de `<eclipse>/dropins/` e reinicie.
 | `adt.mcp.destination` | Destino ADT padrão, para não repeti-lo em toda chamada |
 | `adt.mcp.write.blockedDestinations` | Regex de destinos onde a escrita é recusada. Padrão: nome contendo `PRD` ou `PROD`. Vazio desliga |
 
-O destino também é lido de `arc1.mcp.destination`, por compatibilidade com outra
-extensão MCP de ADT que usa essa propriedade.
+O destino também é lido de `arc1.mcp.destination`, a propriedade que o
+[ARC-1](https://github.com/arc-mcp/arc1-adt-abap-mcp-ext) já usa — quem tem as
+duas extensões instaladas configura o destino uma vez só.
 
 ## Travas
 
