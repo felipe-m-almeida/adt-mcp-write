@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension point="com.sap.adt.mcp.core.adtMcpTools">
+      <mcpTool class="io.github.felipemalmeida.adt.mcp.write.WriteSourceTool"/>
+      <mcpTool class="io.github.felipemalmeida.adt.mcp.write.ActivateTool"/>
+   </extension>
+</plugin>
