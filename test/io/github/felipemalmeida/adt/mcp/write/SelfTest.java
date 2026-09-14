@@ -60,7 +60,7 @@ public final class SelfTest {
       is("classe", "zcl_x", Guards.objectName("/sap/bc/adt/oo/classes/zcl_x"));
       is("com query", "zcl_x", Guards.objectName("/sap/bc/adt/oo/classes/zcl_x?_action=LOCK"));
       is("com barra final", "zcl_x", Guards.objectName("/sap/bc/adt/oo/classes/zcl_x/"));
-      is("namespace codificado", "/4mdg/cl_x", Guards.objectName("/sap/bc/adt/oo/classes/%2f4mdg%2fcl_x"));
+      is("namespace codificado", "/abc/cl_x", Guards.objectName("/sap/bc/adt/oo/classes/%2fabc%2fcl_x"));
    }
 
    private static void uriNormalization() {
@@ -76,8 +76,8 @@ public final class SelfTest {
    private static void customObjectGuard() {
       Guards.assertCustomObject("/sap/bc/adt/oo/classes/zcl_x");
       Guards.assertCustomObject("/sap/bc/adt/oo/classes/ZCL_X");
-      Guards.assertCustomObject("/sap/bc/adt/programs/includes/y4mdg_i");
-      Guards.assertCustomObject("/sap/bc/adt/oo/classes/%2f4mdg%2fcl_x");
+      Guards.assertCustomObject("/sap/bc/adt/programs/includes/yexemplo_i");
+      Guards.assertCustomObject("/sap/bc/adt/oo/classes/%2fabc%2fcl_x");
       rejects("classe standard", () -> Guards.assertCustomObject("/sap/bc/adt/oo/classes/cl_gui_alv_grid"));
       rejects("programa standard", () -> Guards.assertCustomObject("/sap/bc/adt/programs/programs/rsusr002"));
    }
