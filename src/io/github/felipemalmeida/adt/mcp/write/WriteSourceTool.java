@@ -30,7 +30,10 @@ public class WriteSourceTool implements IAdtMCPTool {
    public String getDescription() {
       return "Substitui o fonte completo de um objeto ABAP existente (classe, programa, include, function group, "
             + "DDL source) em um destino ADT e ativa em seguida. Executa LOCK, PUT do fonte, ativacao e UNLOCK numa "
-            + "unica sessao stateful, sempre desbloqueando o objeto no fim. Recusa objeto fora do namespace de "
+            + "unica sessao stateful, sempre desbloqueando o objeto no fim. Com objectUri = classe e sourceUri = "
+            + "<classe>/includes/testclasses, cria o include de testes quando ele ainda nao existe "
+            + "(createdTestInclude=true). Include de grupo de funcoes (LZ<grupo>T99) e aceito quando o grupo do URI e "
+            + "de cliente. Recusa objeto fora do namespace de "
             + "cliente (Z*, Y*, /NAMESPACE/) e destino marcado como produtivo. O conteudo enviado substitui o fonte "
             + "inteiro: leia o fonte atual antes e mande o texto completo, nunca um trecho. HTTP 200 na ativacao nao "
             + "garante objeto ativo - confira o campo activated e as mensagens devolvidas.";
@@ -89,7 +92,10 @@ public class WriteSourceTool implements IAdtMCPTool {
       try (AdtSession session = new AdtSession(destination, monitor)) {
          AdtEditing.Lock lock = AdtEditing.lock(session, objectUri);
          String transport = requestedTransport != null ? requestedTransport : lock.suggestedTransport;
+         boolean createdTestInclude;
          try {
+            createdTestInclude = AdtEditing.createClassTestIncludeIfMissing(session, objectUri, sourceUri,
+                  lock.handle, transport);
             AdtEditing.putSource(session, sourceUri, lock.handle, transport, source);
          } finally {
             AdtEditing.unlock(session, objectUri, lock.handle);
@@ -112,6 +118,7 @@ public class WriteSourceTool implements IAdtMCPTool {
                .append(",\"objectUri\":").append(Json.escape(objectUri))
                .append(",\"sourceUri\":").append(Json.escape(sourceUri))
                .append(",\"transport\":").append(Json.escape(transport))
+               .append(",\"createdTestInclude\":").append(createdTestInclude)
                .append(",\"messages\":").append(Results.messagesToJson(messages))
                .append("}");
 

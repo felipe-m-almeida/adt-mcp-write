@@ -113,6 +113,11 @@ contexto some junto com o contexto.
 - **Objeto standard.** Recusa qualquer objeto fora de `Z*`, `Y*` ou namespace
   registrado (`/ABC/...`). A checagem é pelo nome porque, antes do lock, é o único
   dado disponível — e o lock já seria uma escrita no sistema.
+  **Exceção: include de grupo de funções.** O nome sempre começa com `L`
+  (`LZEXEMPLOT99` é do grupo `ZEXEMPLO`), então pelo nome parece standard. Vale o
+  namespace do grupo do URI: aceito só quando o grupo é de cliente **e** o include é
+  `L` + nome desse grupo. `LSVIMFX2` num grupo standard, ou pendurado num URI de
+  grupo Z, segue recusado (há teste para os dois casos no autoteste).
 - **Destino produtivo.** Recusa destino que case com `adt.mcp.write.blockedDestinations`.
 - **`objectUri` com query string** é recusado: os parâmetros de controle
   (`_action`, `lockHandle`, `corrNr`) são montados pela extensão.
@@ -173,7 +178,21 @@ namespace e de destino, e a leitura das respostas de LOCK, de ativação e de er
   `pak:useAccesses`, `pak:packageInterfaces` e `pak:subPackages`, mesmo vazios.
 - **Ativação em massa** não está implementada: uma chamada, um objeto.
 - **Nada de criar objeto novo** a partir desta extensão — é decisão de escopo, não
-  limitação técnica.
+  limitação técnica. **Única exceção: o include de testes de classe.** Com
+  `objectUri` = classe e `sourceUri` = `<classe>/includes/testclasses`, se o GET do
+  include devolver 404 a extensão o cria (POST em `<classe>/includes` com
+  `class:includeType="testclasses"`) entre o LOCK e o PUT, e responde
+  `createdTestInclude: true`. Não há outro caminho sem o Eclipse: o POST exige o lock
+  da classe **na mesma sessão**, e uma chamada HTTP avulsa é stateless (o handle já
+  chega inválido, 423). Ao ativar a classe inteira, o SAP marca
+  `SEOCLASSDF-WITH_UNIT_TESTS`; ativar só o include deixa o aviso "include exists,
+  but is not used" e o ABAP Unit não acha os testes.
+- **Include de teste de grupo de funções.** Tem de ser o oficial `L<grupo>T99`: um
+  include com outro nome compila classe de teste comum, mas recusa `TEST-INJECTION`
+  ("No injection is expected here"). Criar por POST em
+  `/sap/bc/adt/functions/groups/<grupo>/includes`, gravar com esta extensão
+  (`activate: false`), descomentar o `INCLUDE` no `SAPL<grupo>` e ativar programa
+  principal e include **juntos**, numa chamada só ao `/sap/bc/adt/activation`.
 
 ## Licença
 

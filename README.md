@@ -115,6 +115,12 @@ in the context disappears along with the context.
 - **Standard objects.** Refuses anything outside `Z*`, `Y*` or a registered
   namespace (`/ABC/...`). The check is by name because, before the lock, that is
   the only data available — and the lock would already be a write to the system.
+  **Exception: function group includes.** Their names always start with `L`
+  (`LZEXAMPLET99` belongs to group `ZEXAMPLE`), so by name alone they look
+  standard. What counts is the namespace of the group in the URI: the include is
+  accepted only when that group is a customer one **and** the include is `L` +
+  that group's name. `LSVIMFX2` under a standard group, or hanging off a `Z` group
+  URI, is still refused (the self-test covers both cases).
 - **Productive destinations.** Refuses any destination matching
   `adt.mcp.write.blockedDestinations`.
 - **`objectUri` with a query string** is refused: the control parameters
@@ -179,7 +185,21 @@ error responses.
   `pak:packageInterfaces` and `pak:subPackages`, even when empty.
 - **Mass activation** is not implemented: one call, one object.
 - **No object creation** from this plugin — a scope decision, not a technical
-  limitation.
+  limitation. **The one exception is a class's test include.** With `objectUri` =
+  the class and `sourceUri` = `<class>/includes/testclasses`, if the GET on the
+  include returns 404 the plugin creates it (POST to `<class>/includes` with
+  `class:includeType="testclasses"`) between the LOCK and the PUT, and answers
+  `createdTestInclude: true`. There is no other way outside Eclipse: that POST needs
+  the class lock **in the same session**, and a standalone HTTP call is stateless
+  (the handle already arrives invalid, 423). Activating the whole class makes SAP
+  set `SEOCLASSDF-WITH_UNIT_TESTS`; activating only the include leaves the warning
+  "include exists, but is not used" and ABAP Unit finds no tests.
+- **Function group test include.** It has to be the official `L<group>T99`: an
+  include with another name compiles ordinary test classes, but `TEST-INJECTION`
+  is rejected there ("No injection is expected here"). Create it with a POST to
+  `/sap/bc/adt/functions/groups/<group>/includes`, write it with this plugin
+  (`activate: false`), uncomment the `INCLUDE` in `SAPL<group>` and activate the
+  main program and the include **together** in one call to `/sap/bc/adt/activation`.
 
 ## License
 
