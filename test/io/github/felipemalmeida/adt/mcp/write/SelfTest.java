@@ -80,6 +80,33 @@ public final class SelfTest {
       Guards.assertCustomObject("/sap/bc/adt/oo/classes/%2fabc%2fcl_x");
       rejects("classe standard", () -> Guards.assertCustomObject("/sap/bc/adt/oo/classes/cl_gui_alv_grid"));
       rejects("programa standard", () -> Guards.assertCustomObject("/sap/bc/adt/programs/programs/rsusr002"));
+
+      // Include de grupo de funcoes: vale o namespace do grupo, nao o L do nome
+      Guards.assertCustomObject("/sap/bc/adt/functions/groups/zexemplo/includes/lzexemplot99");
+      Guards.assertCustomObject("/sap/bc/adt/functions/groups/ZEXEMPLO/includes/LZEXEMPLOTOP");
+      Guards.assertCustomObject("/sap/bc/adt/functions/groups/yfg/includes/lyfgtop");
+      rejects("include de grupo standard",
+            () -> Guards.assertCustomObject("/sap/bc/adt/functions/groups/svim/includes/lsvimfx2"));
+      rejects("include standard pendurado em grupo Z",
+            () -> Guards.assertCustomObject("/sap/bc/adt/functions/groups/zexemplo/includes/lsvimfx2"));
+      rejects("include de outro grupo Z sem o L do grupo",
+            () -> Guards.assertCustomObject("/sap/bc/adt/functions/groups/zexemplo/includes/lzoutrot99"));
+      rejects("include L em programa, fora de grupo",
+            () -> Guards.assertCustomObject("/sap/bc/adt/programs/includes/lzexemplot99"));
+
+      // Include de testes de classe: so o CCAU da propria classe do objectUri
+      is("testclasses da propria classe", true, AdtEditing.isClassTestInclude(
+            "/sap/bc/adt/oo/classes/zcl_x", "/sap/bc/adt/oo/classes/zcl_x/includes/testclasses"));
+      is("testclasses com /source/main", true, AdtEditing.isClassTestInclude(
+            "/sap/bc/adt/oo/classes/zcl_x", "/sap/bc/adt/oo/classes/ZCL_X/includes/testclasses/source/main"));
+      is("testclasses de outra classe", false, AdtEditing.isClassTestInclude(
+            "/sap/bc/adt/oo/classes/zcl_x", "/sap/bc/adt/oo/classes/zcl_y/includes/testclasses"));
+      is("outro include da classe", false, AdtEditing.isClassTestInclude(
+            "/sap/bc/adt/oo/classes/zcl_x", "/sap/bc/adt/oo/classes/zcl_x/includes/implementations"));
+      is("fonte principal", false, AdtEditing.isClassTestInclude(
+            "/sap/bc/adt/oo/classes/zcl_x", "/sap/bc/adt/oo/classes/zcl_x/source/main"));
+      is("objectUri que nao e classe", false, AdtEditing.isClassTestInclude(
+            "/sap/bc/adt/programs/programs/zprog", "/sap/bc/adt/programs/programs/zprog/includes/testclasses"));
    }
 
    private static void destinationGuard() {

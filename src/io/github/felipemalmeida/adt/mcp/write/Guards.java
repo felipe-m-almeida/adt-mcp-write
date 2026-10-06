@@ -1,5 +1,6 @@
 package io.github.felipemalmeida.adt.mcp.write;
 
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
@@ -11,6 +12,10 @@ final class Guards {
 
    /** Objeto do cliente: Z*, Y* ou namespace registrado (/ABC/...). */
    private static final Pattern CUSTOM_OBJECT = Pattern.compile("^(?:[zyZY].*|/[A-Za-z0-9_]+/.*)$");
+
+   /** Include de grupo de funcoes: o nome do grupo vem no URI, antes de /includes/. */
+   private static final Pattern FUNCTION_GROUP_INCLUDE =
+         Pattern.compile("(?i)^/sap/bc/adt/functions/groups/([^/?]+)/includes/([^/?]+)/?(?:\\?.*)?$");
 
    private static final String DEFAULT_BLOCKED_DESTINATIONS = "(?i).*(prd|prod).*";
 
@@ -59,10 +64,31 @@ final class Guards {
     */
    static void assertCustomObject(String objectUri) {
       String name = objectName(objectUri);
+      if (isCustomFunctionGroupInclude(objectUri)) {
+         return;
+      }
       if (!CUSTOM_OBJECT.matcher(name).matches()) {
          throw new IllegalStateException("Objeto " + name
                + " nao esta em namespace de cliente (Z*, Y* ou /NAMESPACE/): este bundle nao altera objeto standard");
       }
+   }
+
+   /**
+    * Include de grupo de funcoes sempre comeca com L (LZEXEMPLOT99 e do grupo
+    * ZEXEMPLO), entao pelo nome sozinho parece standard. Vale o namespace do
+    * grupo: aceita so quando o grupo do URI e de cliente e o include e L + nome
+    * desse grupo. Include de grupo standard (LSVIMFX2 e cia.) e include de outro
+    * grupo pendurado num URI de grupo Z continuam recusados.
+    */
+   static boolean isCustomFunctionGroupInclude(String objectUri) {
+      Matcher matcher = FUNCTION_GROUP_INCLUDE.matcher(objectUri);
+      if (!matcher.matches()) {
+         return false;
+      }
+      String group = matcher.group(1).replaceAll("(?i)%2f", "/");
+      String include = matcher.group(2).replaceAll("(?i)%2f", "/");
+      return CUSTOM_OBJECT.matcher(group).matches()
+            && include.toUpperCase().startsWith("L" + group.toUpperCase());
    }
 
    /** Ultimo segmento do URI, sem query string, com %2f devolvido a barra. */
